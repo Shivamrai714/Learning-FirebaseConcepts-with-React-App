@@ -1,0 +1,601 @@
+
+Make a basic React App.
+1.Make sure the  Node.js and npm is installed in your system.
+=> npm => install -g create-react-app   (it download it in harddisk  whereas npx uses it from online )
+
+2.Create the react app .
+  npx create-react-app demo-app
+
+3. switch to project directory then start the project.
+  cd : demoapp then start the app. 
+  npm start.
+_________________________
+4.Now open the Firebase project and create the web app and then attach it to react app using commands.
+
+=>npm install firebase
+
+Make a new file firebase.js  in react project and initalize the app using below code..
+
+
+-To verify 
+ open real time database and crate the one using test mode. 
+-Put the database url in  Firebase.js   file.
+
+Now as soon the pushData button is clicked the data will be saved in the database of Firebase.
+________________
+
+5.Authentication :
+
+ Now to create the SignUpPage create a signupcomponent signup.jsx . In pages folder
+ Now create the variables using useState  , and use the methods from auth , to save username and password of user to the database.
+Then export the component. 
+
+Import the signUpPAge component in app.js file and just click the add user button to see the change in firebase database users.
+
+_____________________
+6. Login User 
+
+  -use the method Signinuserwithemailand password method of auth.
+  -Similary create the useState and use the method to loggin the user.
+______________________
+7. Correct Way of using the Firebase using context-API
+(VIdeo 6 :  Pyush Garg )
+-make a context folder in src . Make a firebase.jsx file in it.
+
+MAKE A SEPERATE PROJECT AND IMPLEMENT THAT.
+
+_______________________________________________
+8. Signin With Google Accounts 
+
+ Make a seperate button and desing a function to sigin with the google .
+ Import these
+	GoogleAuthProvider,
+  	signInWithPopup,
+
+ -declare these
+const googleAuthProvider = new GoogleAuthProvider();
+
+const signupWithGoogle =() =>{
+    signInWithPopup(auth,googleAuthProvider);
+}
+
+
+-And finally attach function  to the button.
+ <button onClick={signupWithGoogle}>Sign In With Google </button>
+
+--- 
+Also make modification in the app.js to update the state of user upon registering.
+
+
+________________________________
+
+9.Deteching the current user Logged In :
+
+In app.js  : 
+Use onAuthStateChange()  ---  import this.
+
+-When our function mounts , then we can perfrom any task using useEffect
+
+useEffect(  ()=> {}  ,  [] ) 
+
+-Also make a variable of user using useState to setUser , when authState Changes 
+
+
+For Signout / Logout 
+-import the signOut()  of firebase / auth , it will change the authState and component rereder and useEffect()  sets user to null.
+
+
+
+_______________________________________________________________
+(Refer Piyush Garg Youtube : Firebase with ReactJs series .)
+
+10.Getting Started with Firebase  Cloud FireStore : 
+
+
+-It keeps the data in the format of documents.
+-Format of Stroage is Collections -> Documents.
+
+-Make a Database , with test mode in firestore , then make a collection "users"
+
+
+---Writing the data using the follwing format.
+
+
+__________________-
+
+How to  add , fetch the doucment , getDoc method from firebase. Update doc.
+
+
+import './App.css';
+import {getFirestore ,  collection , addDoc ,ref , doc, getDoc , query , where ,getDocs, updateDoc } from "firebase/firestore"
+import {app} from "./firebase"
+
+const firestore = getFirestore(app);
+
+function App() {
+
+  //  ADD 1 : add a single collection:
+ const writeData = async() => {
+  const result = await  addDoc( collection(firestore , "cities"), {
+    name:"Delhi",
+    pinCode : 464551,
+    lat:123,
+    lang:456,
+  });
+  console.log("Result", result)
+ };
+
+ // Add 2 . Make a collection inside the document.
+ const makeSubCollection = async() => {
+  await addDoc(collection(firestore,'cities/uS6eInCvkGohb90O0QRZ/places'),{
+  name:'Railway Station',
+  desc:'Metro Station place',
+  date:Date.now(),
+  })
+ }
+
+
+ // GET 2. 
+ const getDocument = async() =>{
+  const ref = doc(firestore , "cities", "uS6eInCvkGohb90O0QRZ");
+  const snap = await getDoc(ref);
+
+  console.log(snap.data());
+
+ }
+
+// Query the data . 
+const getDocumentsbyQuery= async()=>{
+  const collectionRef = collection(firestore,"users");
+  const q = query( collectionRef , where("isMale","==",true));
+  const snapshot = await getDocs(q);
+  snapshot.forEach((data) => {console.log(data.data());})
+
+}
+
+// Update the document
+const update= async() =>{
+  const docRef =  doc( firestore , 'cities' , 'uS6eInCvkGohb90O0QRZ');
+  await updateDoc(docRef, {
+    name:"New Delhi"
+  })
+}
+
+
+  return (
+  <div className="App">
+    <h1>Firebase FireStore </h1>
+    <button onClick={writeData}> Put Collection Data</button>
+    <button onClick={makeSubCollection}> Put Sub Collection Data</button>
+    <button onClick={getDocument}> Find Document </button>
+    <button onClick={getDocumentsbyQuery}> Query the data </button>
+    <button onClick={update}>  Update </button>
+  </div>
+  );
+}
+
+export default App;
+
+
+
+
+
+
+______________________________
+
+Video 10: After the video of the context ( Correct way of using the Firebase with context and userProvider )
+RealTime Database : 
+
+-We have alrady made the context structure.
+-Add the value in the database 
+-Now we will learn to get the data.
+
+-We can get the data in two ways , either simply using get() or using onValue to get reatime data . 
+-Also using "name" usestate to see the changes dynamically at the realtiime.
+
+
+   const [name,setName]=useState('');
+
+//2.To get the data from the realtime database.
+// get(child(ref(database), "/users/"  )).then(  snapshot =>{ 
+//     console.log(snapshot.val());
+// });
+
+// 2.b. Since the values are refreshing , we need to put them in useEffect.
+useEffect( ()=>{
+    onValue(ref(database,'/users/Vedansh') ,(snapshot) =>{
+        console.log(snapshot.val());
+        setName(snapshot.val().email)
+    
+    } )
+} ,[] );
+
+
+  return  <FirebaseContext.Provider 
+  value={{signupUserWithEmailAndPassword  , putData }}
+  > 
+  <h1>Email_Name :   {name} </h1>
+  {props.children} </FirebaseContext.Provider>
+  
+}
+
+
+______________________________________
+VIDEO : 11 
+
+Making the project 
+
+-1.Create a  new project on Firebase  . "BookLibrary"
+-2.Also set up the empty react project using   "npx create-react-app  book-library" and then start it using ng serve.
+-3.Install tools like   firebase , react-bootstarp , react-router-dom using below line 
+
+=> npm i firebase
+=> npm install react-bootstrap bootstrap
+=> npm install react-router-dom
+
+
+-4. Now connecting firebase project "book-library" with the react app. 
+   So create a web app in the project  "library-web-app"
+   Now we are going to follow the context structure of development.  in react project.
+   Make a context folder and firebase.jsx file inside it. And create a context and export the FirebaseProvider like below code. 
+   Also make a hook to access the function / states defined in this context.
+
+import { createContext } from "react";
+
+const FirebaseContext = createContext(null);
+
+//Created a hook to use this context in outsdie files
+export const  useFirebase = useContext(FirebaseContext);
+
+export const FirebaseProvider = (props) => {
+    return <FirebaseContext.Provider>
+        {props.children}
+    </FirebaseContext.Provider>
+}
+
+-5. Now we need to implement the FirebaseProvide in index.js file of the project to encapuse the <App> component . 
+root.render(
+  <React.StrictMode>
+    <FirebaseProvider>
+    <App />
+    </FirebaseProvider>
+  </React.StrictMode>
+);
+
+
+
+-6.Now  connect the react app with the code generate by firebase web app.
+
+copy the code of firebaseConfig and paste in firebase.jsx  and also initialize the app.
+
+-Import the method from below and use it .
+import {initializeApp} from 'firebase/app' 
+
+________________________
+*****************************
+
+Full Structure look alike this of firebase.jsx file.
+
+import { createContext, useContext } from "react";
+import {initializeApp} from 'firebase/app'
+
+const FirebaseContext = createContext(null);
+// Creating hook to use the context in app.js file
+export const  useFirebase = () => useContext(FirebaseContext);
+
+
+
+// Code from firebase web app
+const firebaseConfig = {
+    apiKey: "AIzaSyCIjT7sGuMGJ-8J6GDiE_QFwZDcOTQJ8h4",
+    authDomain: "book-library-eab4e.firebaseapp.com",
+    projectId: "book-library-eab4e",
+    storageBucket: "book-library-eab4e.appspot.com",
+    messagingSenderId: "310540192935",
+    appId: "1:310540192935:web:1a957cd2c928d625615f82"
+  };
+const firebaseApp = initializeApp(firebaseConfig);
+
+
+
+
+
+
+export const FirebaseProvider = (props) => {
+
+    return <FirebaseContext.Provider>
+        {props.children}
+    </FirebaseContext.Provider>
+
+}
+
+________________________
+*****************************
+
+7.Now to use the CSS of bootstrap that we have downloaded , we need to include it in app.js file.
+import 'bootstrap/dist/css/bootstrap.min.css'
+
+8.Setting Up the routing in the react app. Go to index.js
+ 
+import { BrowserRouter } from 'react-router-dom';
+root.render(
+  <React.StrictMode>
+    <BrowserRouter>
+    <FirebaseProvider>
+    <App />
+    </FirebaseProvider>
+    </BrowserRouter>
+  </React.StrictMode>
+);
+
+
+Now we will gives routes in App.js file.
+
+function App() {
+  return
+   <Routes>
+ <Route  path="/"  element={<h1> Home Element </h1>} ></Route>
+ <Route  path="/login"  element={<h1> Login Page </h1>} ></Route>
+  </Routes>
+}
+--
+Set up other folders like pages , components , inside the src folder.
+
+
++++++++++++++++++++++++++++++++++++++++++++++
++++++++++++++++++++++++++++++++++++++++++++++
+
+NOW BEGinning the project.  
+_____________________________________________
+Video  : 12   Authentication  with Email and Goolge.
+
+9.SignUp Page :   in pages folder
+
+-
+Now just Google ReactStrap and work like bootstarp copy paste the content. 
+Just go to app.js file and then import the pages and bind it to the Routes to render them .
+
+Now go to Firebase . And enable the authentication with Google as well as with password and email.
+
+-Now we need to make a function in context firebase.jsx file . To register the user entering username and password.
+
+____
+
+After making the function  . Just pass it values {{  ....  }} in <UserProvider>
+
+Then  import the firebase hook to import this function in our Register.jsx page .
+
+import { useFirebase } from '../context/firebase';
+ const firebase = useFirebase();
+   console.log(firebase);  
+
+
+-Now we need to create the variable like email and password to track the changes in them. So use UseState 
+Also bind these vairable to the onChange attribute.
+
+   const [email,setEmail]=useState('');
+   const[password,setPassword]=useState('');
+
+ <Form.Control type="email"
+    onChange={(e)=> setEmail(e.target.value)}
+    value={email}
+    placeholder="Enter email" />
+
+______________
+
+Now add the handleSubmit()  in Form tag. Also do e.preventDefault() to temporalily delay the refresh of page and form submission and registering user in the databsae.
+
+***********************
+
+10.login Page :   in pages folder
+
+-Just copy the required content and use the login method of firebase . To login in  . And also include the GooleSign In intergration Option .
+-Also make it routing enable by setting configuration in app.js.
+-Now imort and define the sign in method in firebase.jsx file.
+
+import { getAuth , 
+    createUserWithEmailAndPassword ,
+    signInWithEmailAndPassword   
+} from  'firebase/auth'
+
+
+-----------
+Now to add the Goolge  , Enable the Google Provider from the firebase console.
+
+Now do the follwing , import method to signinwithGoogle ..... in firebase.jsx
+import these two
+    GoogleAuthProvider,
+    signInWithPopup,
+
+
+-Also make the instance of it to use it. Like we had done for the firebase Auth
+const firebaseAuth = getAuth(firebaseApp);
+const googleAuthProvider = GoogleAuthProvider();
+
+
+//3. Login with Google 
+   const signInWithGoogle = () => {
+    signInWithPopup(firebaseAuth,googleProvider);
+   }
+
+Now call this function on onclick event of button .
+
+Also use onAuth Change to check user is loggedIn or not , Helpful to show the logout button. 
+We further need useState and useEffect to check upon the changing state of the User ie login and lougout.
+
+_____________
+
+We have defined the varaible isLoggedIn  on base of AuthStatechange and passed in in userProvider to be used in loginpage to do conditional rendering . 
+
+use this to navigate.
+const navigate = useNavigate();
+
+//Also add the firebase and navigate in dependency , so that it also rechecks condition when the state of these two changes.
+_____________________________
+
+
+useEffect :   Whenever we want to check the status as the componenet mounts or page reloads  . We use it
+
+Also implement the same concept in the register page.
+
+++++++++++++++++++++++++++
+==============================================================
+ 
+VIDEO :  13 
+
+++++++++++++++++++++++++++
+
+11.
+
+-Male a new file navabar.jsx in components folder.
+-Add the navbar from the react Strap : 
+
+
+-Now to add the links in the Navbar we need to use the NavLinks and to=""  attribute.
+Or if it not work , temporary add the href ="/book/list"
+
+
+-------------
+
+12.Now Link the FireStore database  to store the Book in backend.
+Create Database and start in test mode. And Setup its configuration in firebase.jsx file.
+
+import {getFirestore}  from 'firebase/firestore'
+const firestore =  getFirestore(firebaseApp);
+
+ const handleSubmit = async (e) => {
+    e.preventDefault();
+   await firebase.handleCreateNewListing(name,isbnNumber,price,coverPic);
+  }
+
+----
+Now while handling the form submission in backend in firebase.jsx we need to  save the image in Book and then store its refence in the firestore database.
+
+-WE NEED TO USE THE STORAGE of the Firebase so  go to BUild -> Storage  and enable it
+-Set the rule .to true ***********
+
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read, write: if true;
+         
+    }
+  }
+}
+
+
+-Now create the instance of Storage  by importing it.
+
+import {getStorage , ref, uploadBytes} from 'firebase/storage'
+
+SO this is how we have completed adding the book in the databse.
+You can verify the data is being added to the Firebase DAtabase .  And Images are saved in Firebase Storage.
+
+________________________
+
+VIDEO :  14 
+
+Fetching the Records from the Database and displaying them .
+
+-We will crate a card component to show the list of books . 
+-Import the card componet in Home and use map function to traverse on the list of books available.
+
+now we want to inject the data of backend books in the Card , using props.
+
+-Then to render the image.
+-In firebase.jsx file  using function  getDownloadURL 
+
+
+// 6.Method for Rendering the image . Along with Books details.
+const getImageUrl = (path) =>{
+  return getDownloadURL(ref(storage,path));
+}
+
+
+
+----------------------------
+
+Video 15 :
+ 
+Now we are going to be Make details page of the books .
+
+Now also pass the id of the book in props from the Home page,  to  navigate to the other page to show full details of the page
+
+Now to use the bookId which is sent from the Home componet , we are going to use the useParams.
+
+    const params = useParams();
+    console.log(params)
+    
+-Also importing doc, getDoc function to fetch the document from the database.
+
+import { getFirestore, collection, addDoc, getDocs, doc , getDoc} from "firebase/firestore";
+import { getStorage, ref, uploadBytes , getDownloadURL } from "firebase/storage";
+
+----------
+
+Now to load the imaage in this page also , we need to download the image from its given url , and then we will show the image in url variable.
+
+ useEffect(() => {
+    if (data) {
+      const imageURL = data.imageURL; //First fetching url value from data object, then downloiading image and setting to url variable.
+      firebase.getImageUrl(imageURL).then((url) => {
+        setURL(url);
+      });
+    }
+  }, [data]);
+
+
+ <img  src={url} width="50%"  style={{borderRadius:'10px'}} alt="Loading Image"></img>
+
+_____________________________________________________________
+
+
+
+Now Finally , When we click the buy now button . 
+
+The idea is to create more collection inside the each of the document . .
+
+
+So basically we want to store the no of orders of each book . 
+
+const placeOrder = async (bookId , quantity) => {
+
+  const collectionRef= collection(firestore , 'books' , bookId , 'orders')   //giving the path to make coll in Firebase  books/123/orders/
+  const result = await addDoc(collectionRef , {
+    userId: user.uid,
+    userEmail: user.email,
+    displayName: user.displayName,
+    photoURL: user.photoURL,
+    quantity: Number(quantity),
+  });
+  return result;
+};
+
+
+
+________________
+
+Now we want to Also make the owner of book to show how many orderrs are placed. 
+-Make a order page and configure the route for in Navbar.
+Then configure the routes in app.js to render the OrderPage component .
+
+
+
+--Now Idea is to show the books which a particular user has written and also mentioning the orders he received for those books.
+-We can fetch according to the user on basics of userId that we have stored there.
+
+_____________
+
+Now we are rendering the Card component with different link . One when Home card View  button is clicked we are going to show the Book Information .And In Orders Section when 
+view button is clicked we  are going  to show the orders associated with that book for the author.
+This is possible by adding the link dynamically , ie passing it as  props.
+
+-Now creating the method in firebase.js file to fetch the details of the order.
+
+_____________________________________________________
+
+Last Video 16 : How to send the Push notification in the website.
+
+-Use firebase messing tool.
+(Refer Video  :   )
